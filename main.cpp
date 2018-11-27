@@ -1,27 +1,26 @@
-#include <iostream>
-#include <fstream>
 #include <vector>
 #include "myCurses.h"
 #include "gameOfLife.h"
-
+#include <unistd.h>
 using namespace std;
 
 int width = 70;
-int height = 30;
+int height = 28;
 int x = 1, y = 1;
 
-CONTAINER gameVector(height - 2, vector<int>(width - 2, 0));
+bool isExecuted = false;
+CONTAINER gameVector(height - 2, vector<bool>(width - 2, 0));
 
 int main(int argc, char const *argv[])
 {
     myCurses *c = myCurses::getInstance();
     gameOfLife *g = new gameOfLife();
-    WINDOW *win = c->newWindow(width, height, y + 1, x);
+    WINDOW *win = c->newWindow(width, height, y + 3, x + 2);
 
     c->setWindow(win);
 
-    ofstream myfile;
-    myfile.open("gameOfLife.txt");
+    //ofstream myfile;
+    //myfile.open("gameOfLife.txt");
     while (true)
     {
         const int userInput = getch();
@@ -43,19 +42,15 @@ int main(int argc, char const *argv[])
         }
         else if (input == INPUTS::EXECUTE)
         {
-            for (int i = 0; i < gameVector.size(); i++)
+            while (true)
             {
-                for (int j = 0; j < gameVector[i].size(); j++)
-                {
-                    myfile << gameVector[i][j] << " ";
-                }
-                myfile << "\n";
+                gameVector = g->execute(&gameVector);
+                c->updateScreenWithVector(&gameVector);
+                isExecuted = true;
+                usleep(250000);
             }
-            auto res = g->execute(&gameVector);
-            c->updateScreenWithVector(&gameVector);
         }
         wrefresh(win);
     }
-    myfile.close();
     return 0;
 }

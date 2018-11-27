@@ -1,5 +1,5 @@
 #include "myCurses.h"
-
+#include <string>
 myCurses *myCurses::m_instance = NULL;
 
 myCurses::myCurses()
@@ -20,17 +20,22 @@ void myCurses::initNCurses()
     raw();                //
     noecho();             // no echo for getch
     keypad(stdscr, true); //provide special characters like, Backspace, Arrow Keys etc.
+
+    for (int i = 0; i < 26; i++)
+    {
+        mvaddstr(i + 4, 2, std::to_string(i).c_str());
+    }
+    
     mvaddstr(0, 15, "C++ Implementation of Conway's Game of Life");
     mvaddstr(2, 75, "Rules of Conway's Game of Life");
     mvaddstr(4, 80, "1 - Any live cell with fewer than two live neighbors dies, as if by underpopulation.");
     mvaddstr(6, 80, "2 - Any live cell with two or three live neighbors lives on to the next generation.");
     mvaddstr(8, 80, "3 - Any live cell with more than three live neighbors dies, as if by overpopulation.");
-    mvaddstr(10,80, "4 - Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.");
+    mvaddstr(10, 80, "4 - Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.");
 
-
-    mvaddstr(12,75, "Go to the top of the cell you want to mark and press 'a' key");
-    mvaddstr(13,75, "Press enter to start!");
-    mvaddstr(13,75, "Press backspace to exit!");
+    mvaddstr(12, 75, "Go to the top of the cell you want to mark and press 'a' key");
+    mvaddstr(13, 75, "Press enter to start!");
+    mvaddstr(13, 75, "Press backspace to exit!");
 
     refresh();
 }
@@ -50,8 +55,19 @@ void myCurses::setWindow(WINDOW *win)
     m_win = win;
 }
 
-void myCurses::updateScreenWithVector(CONTAINER * c)
+void myCurses::updateScreenWithVector(CONTAINER *c)
 {
+    m_x = 1;
+    m_y = 1;
+    wmove(m_win, m_y, m_x);
+    for (int i = 0; i < (*c).size(); i++)
+    {
+        for (int j = 0; j < (*c)[i].size(); j++)
+        {
+            wmove(m_win, i + 1, j + 1);
+            writeChar((*c)[i][j]);
+        }
+    }
     //TODO
 }
 int myCurses::getX()
@@ -71,11 +87,11 @@ WINDOW *myCurses::newWindow(int width, int height, int x, int y)
     m_y = y;
     m_x = x;
     WINDOW *local_win;
-
     local_win = newwin(height, width, m_y, m_x);
     box(local_win, 0, 0); /* 0, 0 gives default characters 
 					 * for the vertical and horizontal
 					 * lines*/
+
     wmove(local_win, 1, 1);
     wrefresh(local_win); /* Show that box 		*/
 
@@ -135,8 +151,10 @@ INPUTS myCurses::cursorChange(int userInput)
 
 void myCurses::writeChar(const char c)
 {
-    //mvwaddch(getWindow(), m_y, m_x, ACS_DIAMOND);
-    mvwaddch(getWindow(), m_y, m_x, c);
+    if (c == false)
+        mvwaddch(getWindow(), m_y, m_x, ' ');
+    else
+        mvwaddch(getWindow(), m_y, m_x, ACS_DIAMOND);
     if (m_x == m_width - 2)
     {
         m_x = 1;

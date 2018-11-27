@@ -3,7 +3,7 @@
 
 #include <vector>
 
-typedef std::vector<std::vector<int>> CONTAINER;
+typedef std::vector<std::vector<bool>> CONTAINER;
 
 enum class INPUTS
 {
